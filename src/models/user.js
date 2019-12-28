@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Todo = require('./todo');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -51,6 +52,12 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
+userSchema.virtual('todo', {
+  ref: 'Todo',
+  localField: '_id',
+  foreignField: 'owner',
+});
+
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
 
@@ -91,6 +98,13 @@ userSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, 8);
   }
 
+  next();
+});
+
+userSchema.pre('remove', async function(next) {
+  const user = this;
+
+  await Todo.deleteMany({ owner: user._id });
   next();
 });
 

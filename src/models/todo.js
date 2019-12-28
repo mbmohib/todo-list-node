@@ -10,6 +10,11 @@ const Todo = mongoose.model('Todo', {
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
 });
 
 module.exports = Todo;
